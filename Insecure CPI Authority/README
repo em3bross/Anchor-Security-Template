@@ -1,0 +1,41 @@
+The program transfers SPL tokens using a user-supplied authority without verifying that the authority is actually permitted to control the source account.
+How this can be abused
+An attacker can:
+• Supply a victim’s token account as 'from'
+• Supply themselves as 'authority'
+• If the token account has delegated allowance or weak upstream checks, the program becomes an unintentional asset mover.
+Even worse, the program provides legitimacy to the CPI call, which downstream programs trust.
+----
+## Vulnerability Overview
+The vulnerable program performs a CPI to the SPL Token program using a user-supplied authority without verifying that the authority is allowed to control the source token account.
+This is a classic confused-deputy vulnerability.
+---
+## Vulnerable Code Location
+# File:
+rust
+pub authority: Signer<'info>,
+and
+token::transfer(cpi_ctx, amount)?;
+----
+Why This Is Vulnerable
+•The program blindly proxies a CPI
+•No check ensures authority owns the from token account
+•The program becomes an unintended asset transfer intermediary
+Attackers can exploit weak assumptions upstream or delegated allowances.
+
+# Secure Fix Explanation
+## File:
+#[account(
+    mut,
+    constraint = from.owner == authority.key()
+)]
+pub from: Account<'info, TokenAccount>,
+----
+Why This Fix Works
+• Anchor validates the constraint before CPI execution.
+• The CPI authority must match the token account owner.
+• The program cannot be used as a transfer proxy for unauthorized assets.
+Key Security Principle Demonstrated
+• CPI does NOT inherit safety automatically.
+• Programs must explicitly validate CPI authority.
+• Insecure CPI Authority risks are real on Solana.
