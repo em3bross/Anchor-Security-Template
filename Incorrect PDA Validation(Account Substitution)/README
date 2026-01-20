@@ -1,0 +1,36 @@
+##Vulnerability overview
+The vulnerable program accepts an account called 'vault' but never verifies that it is the correct Program Derived Address (PDA).
+This allows attackers to substitute arbitrary accounts that match the expected data layout.
+The program expects a vault PDA but never enforces:
+• PDA derivation
+• Program ownership via seeds
+How this can be abused
+An attacker can:
+• Create their own account with the same Vault layout
+• Pass it in as vault
+• Trick the program into mutating untrusted state
+The program has no guarantee this account:
+• Is derived from expected seeds
+• Is uniquely associated with this program’s logic
+----
+
+Secure Fix Explanation
+#Fix Code:
+[account(mut,
+seeds = [b"vault", user.key().as_ref()],
+bump
+)]
+pub vault: Account<'info, Vault'>,
+
+Why This Fix Works
+• seeds enforce deterministic PDA derivation
+• bump ensures the address is valid
+• Only the program can sign for this PDA
+This guarantees:
+• The vault is unique
+• The vault is owned by the program
+• Account substitution is impossible
+Key Security Principle Demonstrated
+• Account data layout alone is NOT sufficient
+• PDAs must always be validated with seeds
+• Anchor constraints provide compile-time safety
