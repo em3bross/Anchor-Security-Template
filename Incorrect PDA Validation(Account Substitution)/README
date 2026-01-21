@@ -1,4 +1,4 @@
-##Vulnerability overview
+Vulnerability overview
 The vulnerable program accepts an account called 'vault' but never verifies that it is the correct Program Derived Address (PDA).
 This allows attackers to substitute arbitrary accounts that match the expected data layout.
 The program expects a vault PDA but never enforces:
@@ -15,7 +15,7 @@ The program has no guarantee this account:
 ----
 
 Secure Fix Explanation
-#Fix Code:
+Fix Code:
 [account(mut,
 seeds = [b"vault", user.key().as_ref()],
 bump
