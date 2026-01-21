@@ -1,5 +1,5 @@
 This demonstrates safe arithmetic and invariant enforcement, a core grading requirement.
-## Vulnerability
+Vulnerability:
 Unchecked arithmetic allows underflow, corrupting state.
 Exploit scenario
 If amount > balance:
@@ -8,19 +8,19 @@ If amount > balance:
 • Program invariants collapse
 The vulnerable program performs unchecked subtraction on user balance, allowing underflow.
 ---
-## Vulnerable Code 
+Vulnerable Code: 
 rust
 account.balance -= amount;
 
-# Fix
+Fix
 We enforce safe arithmetic using checked math.
-## Secure Fix Code
+Fix Code:
 account.balance = account
 .balance
 .checked_sub(amount)
 .ok_or(ErrorCode::InsufficientBalance)?;
 ----
-# Key Security Principle
+Key Security Principle
 • Rust doesn't prevent arithmetic underflow in release builds.
 • All state mutations must preserve invariants.
 • Checked math is mandatory for financial logic.
