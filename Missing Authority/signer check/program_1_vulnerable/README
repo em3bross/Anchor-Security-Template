@@ -1,7 +1,6 @@
-# Program 1 — Missing Authority Check
-## Vulnerability Overview
+Vulnerability Overview
 The vulnerable program allows any signer to modify a state account, regardless of whether they are the legitimate authority for that account. This violates Solana’s account security model, where authority must be explicitly enforced by the program.
-## Vulnerable Code
+Vulnerable Code:
 rust
 pub fn update_value(ctx: Context<UpdateValue>, new_value: u64) -> Result<()> {
     let data = &mut ctx.accounts.data_account;
@@ -15,7 +14,7 @@ Any arbitrary signer can update critical state
 An attacker can simply pass their own key as signer for victim’s data_account and overwrite the value.
 ----
 Secure Fix Explanation
-## Fixed Code
+Fixed Code:
 #[account(
     mut,
     has_one = authority
@@ -28,7 +27,7 @@ has_one = authority enforces that:
 The authority must be a Signer.
 Anchor performs this validation before instruction logic runs.
 This restores the correct authority model and prevents unauthorized mutation.
-Key Security Principle Demonstrated
+Key Security Principle Demonstrated:
 • Solana programs do not enforce authority automatically.
 • Authority must be explicitly checked.
 • Anchor constraints are safer than manual runtime checks.
