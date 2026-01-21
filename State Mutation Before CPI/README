@@ -1,26 +1,24 @@
 Solana does not allow classic EVM style reentrancy, but CPI can still violate invariants if state is mutated before an external call that may fail or behave unexpectedly
 The program updates internal state before making a CPI to the token program.
-Why this is dangerous
+Why this is dangerous:
 • If the CPI fails, the state mutation already happened
 • If downstream logic changes, invariants break
-• Internal accounting no longer matches on-chain reality
-## Vulnerability Overview
-The vulnerable program updates internal vault state before performing a CPI to the SPL Token program.
+• Internal accounting no longer matches on-chain reality
 If the CPI fails, internal accounting becomes inconsistent with actual token balances.
 ---
-## Vulnerable Code
+Vulnerable Code:
 rust
 vault.balance -= amount;
 This occurs before:
 token::transfer(cpi_ctx, amount)?;
 ----
-## Secure Fix Explanation
+Secure Fix Explanation
 Fix Code:
 token::transfer(cpi_ctx, amount)?;
 vault.balance -= amount;
 
 State is only mutated after CPI success.
-## Key Security Principle
+Key Security Principle
 • CPI is an external boundary
 • State must be updated after external calls
 • Preserve invariants under failure conditions
